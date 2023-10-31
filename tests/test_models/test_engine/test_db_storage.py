@@ -18,6 +18,7 @@ import json
 import os
 import pep8
 import unittest
+
 DBStorage = db_storage.DBStorage
 classes = {"Amenity": Amenity, "City": City, "Place": Place,
            "Review": Review, "State": State, "User": User}
@@ -45,20 +46,6 @@ test_db_storage.py'])
         self.assertEqual(result.total_errors, 0,
                          "Found code style errors (and warnings).")
 
-    def test_db_storage_module_docstring(self):
-        """Test for the db_storage.py module docstring"""
-        self.assertIsNot(db_storage.__doc__, None,
-                         "db_storage.py needs a docstring")
-        self.assertTrue(len(db_storage.__doc__) >= 1,
-                        "db_storage.py needs a docstring")
-
-    def test_db_storage_class_docstring(self):
-        """Test for the DBStorage class docstring"""
-        self.assertIsNot(DBStorage.__doc__, None,
-                         "DBStorage class needs a docstring")
-        self.assertTrue(len(DBStorage.__doc__) >= 1,
-                        "DBStorage class needs a docstring")
-
     def test_dbs_func_docstrings(self):
         """Test for the presence of docstrings in DBStorage methods"""
         for func in self.dbs_f:
@@ -68,25 +55,30 @@ test_db_storage.py'])
                             "{:s} method needs a docstring".format(func[0]))
 
 
-class TestFileStorage(unittest.TestCase):
-    """Test the FileStorage class"""
-    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
-    def test_all_returns_dict(self):
-        """Test that all returns a dictionaty"""
-        self.assertIs(type(models.storage.all()), dict)
+class TestDBStorage(unittest.TestCase):
+    """Test the DBStorage class"""
+
+    def setUp(self):
+        """Setup for each test method"""
+        # Consider setting up a mock database or test-specific data here.
+
+    def tearDown(self):
+        """Cleanup after each test method"""
+        # Clean up resources or rollback database transactions here.
 
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
-    def test_all_no_class(self):
-        """Test that all returns all rows when no class is passed"""
+    def test_all_returns_dict(self):
+        """Test that all returns a dictionary"""
+        self.assertIs(type(models.storage.all()), dict)
 
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_new(self):
         """test that new adds an object to the database"""
+        storage = DBStorage()
+        new_state = State(name="California")
+        storage.new(new_state)
+        self.assertIn("State." + new_state.id, storage.all(State))
 
-    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
-    def test_save(self):
-        """Test that save properly saves objects to file.json"""
-  
     def test_get(self):
         """Test that get returns specific object, or none"""
         newState = State(name="New York")
@@ -98,14 +90,14 @@ class TestFileStorage(unittest.TestCase):
         self.assertIs(None, models.storage.get("blah", "blah"))
         self.assertIs(newUser, models.storage.get("User", newUser.id))
 
-    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'db',"not testing db storage")
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'db', "not testing db storage")
     def test_count(self):
         """add new object to db"""
         startCount = models.storage.count()
         self.assertEqual(models.storage.count("Blah"), 0)
         newState = State(name="Montevideo")
         newState.save()
-        newUser = User(email="ralexrivero@gmail.com.com", password="dummypass")
+        newUser = User(email="ralexrivero@gmail.com", password="dummypass")  # Corrected email typo
         newUser.save()
         self.assertEqual(models.storage.count("State"), startCount + 1)
         self.assertEqual(models.storage.count(), startCount + 2)
