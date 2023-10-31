@@ -70,32 +70,20 @@ class FileStorage:
         self.reload()
 
 def get(self, cls, id):
-    """retrieves one object based on the class and id"""
-    if not cls:
+        """retrieves one object based on the class and id"""
+        if not cls:
+            return None
+
+        all_objects = self.__objects.values()
+        for item in all_objects:
+            if item.id == id and (item.__class__.__name__ == cls or item.__class__ == cls):
+                return item
+
         return None
-
-    all_objects = FileStorage.__objects.values()
-    for item in all_objects:
-        if item.id == id:
-            return item
-
-    return None
 
     def count(self, cls=None):
         """counts number of objects of a class in storage"""
         if cls:
-            obj_list = []
-            obj_dict = FileStorage.__objects.values()
-            for item in obj_dict:
-                if type(item).__name__ == cls:
-                    obj_list.append(item)
-            return len(obj_list)
+            return len(self.all(cls))
         else:
-            obj_list = []
-            for class_name in self.CNC:
-                if class_name == 'BaseModel':
-                    continue
-                obj_class = FileStorage.__objects
-                for item in obj_class:
-                    obj_list.append(item)
-            return len(obj_list)
+            return len(self.all())
